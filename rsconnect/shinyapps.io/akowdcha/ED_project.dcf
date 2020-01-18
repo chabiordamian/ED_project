@@ -1,0 +1,13 @@
+name: ED_project
+title: ED_project
+username:
+account: akowdcha
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1674696
+bundleId: 2737935
+url: https://akowdcha.shinyapps.io/ED_project/
+when: 1579385463.07734
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: CES11.csv

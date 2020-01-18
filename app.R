@@ -3,6 +3,36 @@ require(ggplot2)
 require(dplyr)
 require(readr)
 
+
+data <- read_csv("CES11.csv")
+data <- subset(data, select=-c(X1, id, weight))
+summary(data)
+data [data == 'ON'] <- "Ontario"
+data [data == 'QC'] <- "Quebec"
+data [data == 'NS'] <- "Nova Scotia"
+data [data == 'NB'] <- "New Brunswick"
+data [data == 'MB'] <- "Manitoba"
+data [data == 'BC'] <- "British Columbia"
+data [data == 'PE'] <- "Prince Edward Island"
+data [data == 'SK'] <- "Saskatchewan"
+data [data == 'AB'] <- "Alberta"
+data [data == 'NL'] <- "Newfoundland and Labrador"
+
+data[] <- lapply(data, factor)
+summary(data)
+
+library(maps)
+library(mapproj)
+library(mapdata)
+library(rgeos)
+library(maptools)
+library(sp)
+library(raster)
+library(rgdal)
+
+can1<-getData('GADM', country="CAN", level=1) # provinces
+plot(can1)
+#spplot(can1, "NAME_1")
 # Define UI for application that draws a histogram
 ui <- fluidPage(
 
