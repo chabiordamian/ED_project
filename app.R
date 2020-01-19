@@ -30,6 +30,8 @@ library(maptools)
 library(sp)
 library(raster)
 library(rgdal)
+library(leaflet)
+library(leaflet.extras)
 
 #can1<-getData('GADM', country="CAN", level=1) # provinces
 #plot(can1)
@@ -42,15 +44,23 @@ ui <- fluidPage(
             selectInput("inProvince", "Province:", choices = data$province)
         ),
         mainPanel(
+           leafletOutput(outputId = "mymap"),
            tableOutput("provinceTable")
         )
     ),
 )
 
 server <- function(input, output) {
+    #Create Table
     output$provinceTable <- renderTable({
-        
         provinceFilter <- subset(data, data$province == input$inProvince)
+    })
+    
+    #create the map
+    output$mymap <- renderLeaflet({leaflet() %>%
+                                      addTiles(
+                                          urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png") %>%
+                                      setView(lng = -93.85, lat = 37.45, zoom = 4)
     })
 }
 
