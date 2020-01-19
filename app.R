@@ -71,7 +71,7 @@ server <- function(input, output) {
     output$mymap <- renderLeaflet({leaflet() %>%
             addTiles(
                 urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png") %>%
-            setView(lng = -93.85, lat = 37.45, zoom = 4)
+            setView(lng = -113.71, lat =60,585, zoom = 3)
     })
 }
 
