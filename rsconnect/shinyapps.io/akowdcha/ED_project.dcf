@@ -5,9 +5,8 @@ account: akowdcha
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1674696
-bundleId: 2737935
+bundleId: 2739507
 url: https://akowdcha.shinyapps.io/ED_project/
-when: 1579385463.07734
+when: 1579450657.2594
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: CES11.csv
