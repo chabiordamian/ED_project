@@ -40,10 +40,6 @@ lbls <- paste(names(table(data2$overall)), (round(table(data2$overall)/sum*100, 
 pie(table(data2$overall), labels = lbls, main ="Should abortion be banned?")
 
 
-provinces_json <- geojsonio::geojson_read("canada.geojson", what = "sp")
-
-bins <- c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
-pal <- colorBin("YlOrRd", domain = provinces_json$cartodb_id, bins = bins)
 
 if (!file.exists("./src/ref/ne_50m_admin_1_states_provinces_lakes/ne_50m_admin_1_states_provinces_lakes.dbf")){
     download.file(file.path('http://www.naturalearthdata.com/http/',
@@ -92,7 +88,8 @@ server <- function(input, output) {
                  if (!is.null(input$inProvince)){
                         output$mymap <- NULL
                         output$mymap <- renderLeaflet({leaflet()%>% addTiles() %>% 
-                             setView(lng = -113.71, lat = 60,585,  zoom = 2) %>% 
+                             setView(lng = subset(region, name == input$inProvince, select =longitude)$longitude,
+                                     lat = subset(region, name == input$inProvince, select =latitude)$latitude, zoom =4) %>% 
                              addPolygons(data = subset(region, name %in% c(input$inProvince)), 
                                          fillColor = topo.colors(10, alpha = NULL), weight = 1)})
                  }
