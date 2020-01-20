@@ -84,25 +84,20 @@ server <- function(input, output) {
     #create the map
     output$mymap <- renderLeaflet({leaflet() %>%
             addTiles() %>% 
-            setView(lng = -113.71, lat=60,585,  zoom = 2) %>% 
-            addPolygons(data = subset(region, name %in% c("British Columbia", "Alberta", "Saskatchewan", "Manitoba", "Ontario", "Quebec", "New Brunswick", "Prince Edward Island", "Nova Scotia", "Newfoundland and Labrador", "Yukon", "Northwest Territories", "Nunavut")), 
-                        fillColor = topo.colors(10, alpha = NULL),
-                       weight = 1)
+            setView(lng = -113.71, lat=60,585,  zoom = 2)
     })
 
     # update the map markers and view on location selectInput changes
-    observe({
-        province <- data[data$province == input$inProvince,]
-        isolate({
-            new_province <- "NA"
-            provinceFilter <- subset(data, data$province == input$inProvince)
-            if (!is.null(input$inProvince)) new_province <- input$inProvince
-                proxy <- leafletProxy("mymap") %>% setView(lng = -113.71, lat =60,585, zoom = 4) %>% 
-                    addPolygons(data = subset(region,  name %in% c("Alberta")), 
-                                fillColor = topo.colors(2, alpha = NULL),
-                                weight = 1)
-        })
-    })
+    observeEvent(input$inProvince,
+                 if (!is.null(input$inProvince)){
+                        output$mymap <- NULL
+                        output$mymap <- renderLeaflet({leaflet()%>% addTiles() %>% 
+                             setView(lng = -113.71, lat = 60,585,  zoom = 2) %>% 
+                             addPolygons(data = subset(region, name %in% c(input$inProvince)), 
+                                         fillColor = topo.colors(10, alpha = NULL), weight = 1)})
+                 }
+    )
+    
     
     observeEvent(input$inCategory, 
         if(input$inCategory == 'overall'){
