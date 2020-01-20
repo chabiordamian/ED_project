@@ -16,6 +16,7 @@ data [data == 'PE'] <- "Prince Edward Island"
 data [data == 'SK'] <- "Saskatchewan"
 data [data == 'AB'] <- "Alberta"
 data [data == 'NL'] <- "Newfoundland and Labrador"
+
 data[] <- lapply(data, factor)
 data2 <- data
 data2 <- subset(data, select=-c(abortion))
@@ -33,14 +34,27 @@ library(rgdal)
 library(leaflet)
 library(leaflet.extras)
 
-
 sum <- table(data2$overall)[1] + table(data2$overall)[2]
 sum <- as.numeric(sum)
 lbls <- paste(names(table(data2$overall)), (round(table(data2$overall)/sum*100, digits = 2)), "%")
 pie(table(data2$overall), labels = lbls, main ="Should abortion be banned?")
 
-#can1<-getData('GADM', country="CAN", level=1) # provinces
-#plot(can1)
+
+provinces_json <- geojsonio::geojson_read("canada.geojson", what = "sp")
+
+bins <- c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100)
+pal <- colorBin("YlOrRd", domain = provinces_json$cartodb_id, bins = bins)
+
+if (!file.exists("./src/ref/ne_50m_admin_1_states_provinces_lakes/ne_50m_admin_1_states_provinces_lakes.dbf")){
+    download.file(file.path('http://www.naturalearthdata.com/http/',
+                            'www.naturalearthdata.com/download/50m/cultural',
+                            'ne_50m_admin_1_states_provinces_lakes.zip'), 
+                  f <- tempfile())
+    unzip(f, exdir = "./src/ref/ne_50m_admin_1_states_provinces_lakes")
+    rm(f)
+}
+
+region <- readOGR("./src/ref/ne_50m_admin_1_states_provinces_lakes", 'ne_50m_admin_1_states_provinces_lakes', encoding='UTF-8')
 
 ui <- fluidPage(
     titlePanel("2011 Canadian National Election Study, With Attitude Toward Abortion"),
@@ -60,19 +74,43 @@ ui <- fluidPage(
 )
 
 server <- function(input, output) {
+    
     output$provinceTable <- renderTable({
         provinceFilter <- subset(data, data$province == input$inProvince)
     })
     
-    output$overallChart <- renderPlot({
-        pie(table(data2$overall), labels = lbls, main ="Should abortion be banned?")
-    })
+
+
     #create the map
     output$mymap <- renderLeaflet({leaflet() %>%
-            addTiles(
-                urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png") %>%
-            setView(lng = -113.71, lat =60,585, zoom = 3)
+            addTiles() %>% 
+            setView(lng = -113.71, lat=60,585,  zoom = 2) %>% 
+            addPolygons(data = subset(region, name %in% c("British Columbia", "Alberta", "Saskatchewan", "Manitoba", "Ontario", "Quebec", "New Brunswick", "Prince Edward Island", "Nova Scotia", "Newfoundland and Labrador", "Yukon", "Northwest Territories", "Nunavut")), 
+                        fillColor = topo.colors(10, alpha = NULL),
+                       weight = 1)
     })
+
+    # update the map markers and view on location selectInput changes
+    observe({
+        province <- data[data$province == input$inProvince,]
+        isolate({
+            new_province <- "NA"
+            provinceFilter <- subset(data, data$province == input$inProvince)
+            if (!is.null(input$inProvince)) new_province <- input$inProvince
+                proxy <- leafletProxy("mymap") %>% setView(lng = -113.71, lat =60,585, zoom = 4) %>% 
+                    addPolygons(data = subset(region,  name %in% c("Alberta")), 
+                                fillColor = topo.colors(2, alpha = NULL),
+                                weight = 1)
+        })
+    })
+    
+    observeEvent(input$inCategory, 
+        if(input$inCategory == 'overall'){
+            output$overallChart <- renderPlot({
+                pie(table(data2$overall), labels = lbls, main =paste0(input$inCategory,"\n Should abortion be banned?"))
+            })
+        }
+    )
 }
 
 shinyApp(ui = ui, server = server)
