@@ -5,8 +5,8 @@ account: akowdcha
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1674696
-bundleId: 2742214
+bundleId: 2742396
 url: https://akowdcha.shinyapps.io/ED_project/
-when: 1579559141.29219
+when: 1579564944.26033
 asMultiple: FALSE
 asStatic: FALSE

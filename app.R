@@ -65,7 +65,7 @@ ui <- fluidPage(
     sidebarLayout(
         sidebarPanel(
             selectInput("inCategory", "Choose a category for pie chart:", choices = colnames(data2)),
-            #selectInput("inGroup", "Choose a group for pie chart:", choices = levels(data2$inCategory)),
+            selectInput("inGroup", "Choose a group for pie chart:", choices = NULL),
             selectInput("inProvince", "Province for Map and Table:", choices = data$province)
         ),
         mainPanel(
@@ -78,7 +78,7 @@ ui <- fluidPage(
     )
 )
 
-server <- function(input, output) {
+server <- function(input, output, session) {
     
     output$provinceTable <- renderTable({
         provinceFilter <- subset(data, data$province == input$inProvince)
@@ -113,6 +113,20 @@ server <- function(input, output) {
             output$overallChart <- renderPlot({
                 pie(table(data2$province), labels = lbls2, main =paste0("Category: ",input$inCategory,"\n Participants per province"))
             })
+            observe({
+            updateSelectInput(session, "inGroup",
+                              choices = c("NONE", levels((data2$province))),
+                              selected = "NONE"
+                              )
+            })
+            observeEvent(input$inGroup,
+                         if(input$inGroup == 'Alberta'){
+                             output$overallChart <- renderPlot({
+                                 pie(table(data2$overall), labels = lbls, main =paste0("Category: ",input$inCategory,"\n Should abortion be banned?"))
+                             })
+                         }
+            )
+            
         }
         else if(input$inCategory == 'gender'){
             output$overallChart <- renderPlot({
